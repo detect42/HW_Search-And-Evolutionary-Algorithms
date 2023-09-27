@@ -262,7 +262,55 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
-def foodHeuristic(state, problem):
+def H1(state,problem):
+    position, foodGrid = state
+
+    Maxdis = 0
+    Mindis = 99999
+    x1, y1 = 0, 0
+    x2, y2 = 0, 0
+    Sum = 0
+    for i, j in foodGrid.asList():
+        Sum += abs(i - position[0]) + abs(j - position[1])
+        for k, l in foodGrid.asList():
+            if (abs(i - k) + abs(j - l) >= Maxdis):
+                x1, y1 = i, j
+                x2, y2 = k, l
+                Maxdis = abs(i - k) + abs(j - l)
+
+    Mindis = min(abs(x1 - position[0]) + abs(y1 - position[1]), abs(x2 - position[0]) + abs(y2 - position[1]))
+
+    if foodGrid.count() == 0:
+        return 0
+
+    return Maxdis + Mindis
+
+
+def H2(state,problem,Map):
+    position, foodGrid= state
+    Maxdis = 0
+    for i, j in foodGrid.asList():
+        Maxdis = max(Maxdis, Map[position[0]][position[1]][i][j])
+
+    #print(position, "===", Maxdis)
+
+    return Maxdis
+
+def H3(state,problem):
+    position, foodGrid = state
+
+    Mindis = 99999
+    x1, y1 = 0, 0
+    x2, y2 = 0, 0
+    Sum = 0
+    for i, j in foodGrid.asList():
+        Maxdis = abs(i - position[0]) + abs(j - position[1])
+
+    if foodGrid.count() == 0:
+        return 0
+
+    return Maxdis + foodGrid.count()-1
+def foodHeuristic(state, problem,Map):
     """
     Your heuristic for the FoodSearchProblem goes here.
 
@@ -290,7 +338,7 @@ def foodHeuristic(state, problem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    #Dij((1,2),(4,2),problem)
+    return max(H1(state,problem),H2(state,problem,Map),H3(state,problem))
+    #return H2(state,problem,Map)
 

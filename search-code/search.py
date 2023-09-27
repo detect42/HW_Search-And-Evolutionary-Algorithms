@@ -161,13 +161,75 @@ def myHeuristic(state, map, problem=None):
         """
     (Goal_x, Goal_y) = problem.goal
 
+    map = [[0 for i in range(problem.walls.height)] for j in range(problem.walls.width)]
+    for i in range(problem.walls.width):
+        for j in range(problem.walls.height):
+            if problem.walls[i][j]:
+                continue
+            # print(i,j)
+            for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                x, y = i, j
+                dx, dy = Actions.directionToVector(action)
+                nextx, nexty = int(x + dx), int(y + dy)
+                if nextx < 0 or nexty < 0 or nextx >= problem.walls.width or nexty >= problem.walls.height:
+                    map[i][j] += 1
+                elif problem.walls[nextx][nexty]:
+                    map[i][j] += 1
+    for i in range(problem.walls.width):
+        for j in range(problem.walls.height):
+            if map[i][j] == 3:
+                map[i][j] = 100
+            elif map[i][j] == 2:
+                map[i][j] = 0
+            elif map[i][j] == 1:
+                map[i][j] = -1
+            elif map[i][j] == 0:
+                map[i][j] = -5
+    map[1][1] = 0
+
     #print(state[0], state[1], (abs(state[0] - Goal_x)**2 + abs(state[1] - Goal_y)**2)**0.5  + map[state[0]][state[1]])
    # return 0
     return (abs(state[0] - Goal_x)**2 + abs(state[1] - Goal_y)**2)**0.5  + map[state[0]][state[1]]
     #return (abs(state[0] - Goal_x) + abs(state[1] - Goal_y))  + map[state[0]][state[1]]
    # return (abs(state[0] - Goal_x) + abs(state[1] - Goal_y))*10  + map[state[0]][state[1]]
 
-def aStarSearch(problem, heuristic=myHeuristic):
+def Dij(S,T,problem):
+
+    P_Que = util.PriorityQueue()
+    VisitedNode = []
+  #  print("S= {}".format(S))
+    # item: (node, action, cost)
+    P_Que.push((S,0) , 0)
+    while not P_Que.isEmpty():
+        Now = P_Que.pop()
+        cur, dis = Now[0], Now[1]
+     #   print(cur,"##",dis)
+        if cur not in VisitedNode:
+            VisitedNode.append(cur)
+            if cur == T: return dis
+            for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                x, y = cur[0],cur[1]
+                dx, dy = Actions.directionToVector(action)
+                nextx, nexty = int(x + dx), int(y + dy)
+                if nextx < 0 or nexty < 0 or nextx >= problem.walls.width or nexty >= problem.walls.height or problem.walls[nextx][nexty] or VisitedNode.__contains__((nextx,nexty)):
+                    continue
+                else:
+                    P_Que.push(((nextx,nexty),dis+1),dis+1)
+
+def Build(problem):
+    A = C = problem.walls.width
+    B = D = problem.walls.height
+    Map = [[[[(0) for _ in range(D)] for _ in range(C)] for _ in range(B)] for _ in range(A)]
+
+    for i in range(problem.walls.width):
+        for j in range(problem.walls.height):
+            for k in range(problem.walls.width):
+                for l in range(problem.walls.height):
+                    if problem.walls[i][j] or problem.walls[k][l]:
+                        continue
+                    Map[i][j][k][l] = Dij((i,j),(k,l),problem)
+    return Map
+def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first.
 
         Your search algorithm needs to return a list of actions that reaches the
@@ -180,45 +242,30 @@ def aStarSearch(problem, heuristic=myHeuristic):
         print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
         print("Start's successors:", problem.getSuccessors(problem.getStartState()))
         """
-    #print("Start:", problem.getStartState())
+    print("Start:", problem.getStartState())
 
 
     print(problem.walls.width , problem.walls.height)
-    map = [[0 for i in range(problem.walls.height)] for j in range(problem.walls.width)]
-    for i in range(problem.walls.width):
-        for j in range(problem.walls.height):
-            if problem.walls[i][j]:
-                continue
-           # print(i,j)
-            for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-                x, y= i, j
-                dx,dy=Actions.directionToVector(action)
-                nextx, nexty= int(x+dx), int(y+dy)
-                if nextx<0 or nexty<0 or nextx>=problem.walls.width or nexty>=problem.walls.height:
-                    map[i][j]+=1
-                elif problem.walls[nextx][nexty]:
-                    map[i][j]+=1
-    for i in range(problem.walls.width):
-        for j in range(problem.walls.height):
-            if map[i][j]==3: map[i][j]=100
-            elif map[i][j]==2: map[i][j]=0
-            elif map[i][j]==1: map[i][j]=-1
-            elif map[i][j]==0: map[i][j]=-5
-    map[1][1]=0
-
+    Map = Build(problem)
     startNode = problem.getStartState()
-    startcost = heuristic(startNode, map, problem)
+    startcost = heuristic(startNode, problem , Map)
     if problem.isGoalState(startNode):
         return []
 
     P_Que = util.PriorityQueue()
     VisitedNode = []
 
+    print(startcost)
+
     # item: (node, action, cost)
     P_Que.push((startNode, [], 0), startcost)
-
+    Show=0
     while not P_Que.isEmpty():
-        currentNode, actions, preCost = P_Que.pop()
+        (currentNode, actions, preCost) = P_Que.pop()
+       # print(currentNode[0],preCost+heuristic(currentNode, problem,Map))
+        if Show < preCost + heuristic(currentNode, problem,Map):
+            Show = preCost + heuristic(currentNode, problem,Map)
+            print("noedepth: {0}".format(Show))
         if (currentNode not in VisitedNode):
             VisitedNode.append(currentNode)
 
@@ -228,7 +275,7 @@ def aStarSearch(problem, heuristic=myHeuristic):
             for nextNode, nextAction, nextCost in problem.getSuccessors(currentNode):
                 newAction = actions + [nextAction]
                 G_Cost = problem.getCostOfActions(newAction)
-                newPriority = G_Cost + myHeuristic(nextNode, map, problem)
+                newPriority = G_Cost + heuristic(nextNode, problem,Map)
                 P_Que.push((nextNode, newAction, G_Cost), newPriority)
 
     util.raiseNotDefined()
