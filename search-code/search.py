@@ -155,12 +155,16 @@ def nullHeuristic(state, problem=None):
 
     return 0
 
-def myHeuristic(state, map, problem=None):
+def myHeuristic(state, problem=None, Map=None):
     """
         you may need code other Heuristic function to replace  NullHeuristic
         """
     (Goal_x, Goal_y) = problem.goal
+    #return (abs(state[0] - Goal_x)**2 + abs(state[1] - Goal_y)**2)**0.5  + Map[state[0]][state[1]]
+    #return (abs(state[0] - Goal_x) + abs(state[1] - Goal_y))  + Map[state[0]][state[1]]
+    return abs(state[0] - Goal_x) + abs(state[1] - Goal_y) + Map[state[0]][state[1]]
 
+def Build_Map_With_Block(problem):
     map = [[0 for i in range(problem.walls.height)] for j in range(problem.walls.width)]
     for i in range(problem.walls.width):
         for j in range(problem.walls.height):
@@ -175,23 +179,36 @@ def myHeuristic(state, map, problem=None):
                     map[i][j] += 1
                 elif problem.walls[nextx][nexty]:
                     map[i][j] += 1
+    map[1][1]=0
+    while True:
+        tot=0
+        for i in range(problem.walls.width):
+            for j in range(problem.walls.height):
+                if problem.walls[i][j]:
+                    continue
+                for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+                    x, y = i, j
+                    dx, dy = Actions.directionToVector(action)
+                    nextx, nexty = int(x + dx), int(y + dy)
+                    if nextx < 0 or nexty < 0 or nextx >= problem.walls.width or nexty >= problem.walls.height:
+                        continue
+                    if map[nextx][nexty] == 3 and map[i][j] == 2:
+                        map[i][j] = 3
+                        tot+=1
+        if tot == 0:
+            break
+
     for i in range(problem.walls.width):
         for j in range(problem.walls.height):
             if map[i][j] == 3:
-                map[i][j] = 100
+                map[i][j] = 100000
             elif map[i][j] == 2:
                 map[i][j] = 0
             elif map[i][j] == 1:
-                map[i][j] = -1
+                map[i][j] = 0
             elif map[i][j] == 0:
-                map[i][j] = -5
-    map[1][1] = 0
-
-    #print(state[0], state[1], (abs(state[0] - Goal_x)**2 + abs(state[1] - Goal_y)**2)**0.5  + map[state[0]][state[1]])
-   # return 0
-    return (abs(state[0] - Goal_x)**2 + abs(state[1] - Goal_y)**2)**0.5  + map[state[0]][state[1]]
-    #return (abs(state[0] - Goal_x) + abs(state[1] - Goal_y))  + map[state[0]][state[1]]
-   # return (abs(state[0] - Goal_x) + abs(state[1] - Goal_y))*10  + map[state[0]][state[1]]
+                map[i][j] = 0
+    return map
 
 def Dij(S,T,problem):
 
@@ -246,8 +263,15 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
 
     print(problem.walls.width , problem.walls.height)
-    Map = Build(problem)
+
+
+    if heuristic != myHeuristic:
+        Map = Build(problem)
+    else:
+        Map=Build_Map_With_Block(problem)
+
     startNode = problem.getStartState()
+
     startcost = heuristic(startNode, problem , Map)
     if problem.isGoalState(startNode):
         return []

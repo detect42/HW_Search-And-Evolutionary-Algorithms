@@ -304,12 +304,12 @@ def H3(state,problem):
     x2, y2 = 0, 0
     Sum = 0
     for i, j in foodGrid.asList():
-        Maxdis = abs(i - position[0]) + abs(j - position[1])
+        Mindis = min(Mindis,abs(i - position[0]) + abs(j - position[1]))
 
     if foodGrid.count() == 0:
         return 0
 
-    return Maxdis + foodGrid.count()-1
+    return Mindis + foodGrid.count()-1
 def foodHeuristic(state, problem,Map):
     """
     Your heuristic for the FoodSearchProblem goes here.
