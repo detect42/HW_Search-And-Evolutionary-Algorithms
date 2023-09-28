@@ -247,23 +247,6 @@ def Build(problem):
                     Map[i][j][k][l] = Dij((i,j),(k,l),problem)
     return Map
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first.
-
-        Your search algorithm needs to return a list of actions that reaches the
-        goal. Make sure to implement a graph search algorithm.
-
-        To get started, you might want to try some of these simple commands to
-        understand the search problem that is being passed in:
-
-
-        print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-        print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-        """
-    print("Start:", problem.getStartState())
-
-
-    print(problem.walls.width , problem.walls.height)
-
 
     if heuristic != myHeuristic:
         Map = Build(problem)
@@ -279,17 +262,16 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     P_Que = util.PriorityQueue()
     VisitedNode = []
 
-    print(startcost)
-
     # item: (node, action, cost)
     P_Que.push((startNode, [], 0), startcost)
     Show=0
     while not P_Que.isEmpty():
         (currentNode, actions, preCost) = P_Que.pop()
-       # print(currentNode[0],preCost+heuristic(currentNode, problem,Map))
+
         if Show < preCost + heuristic(currentNode, problem,Map):
             Show = preCost + heuristic(currentNode, problem,Map)
-            print("noedepth: {0}".format(Show))
+          #  print("noedepth: {0}".format(Show))
+
         if (currentNode not in VisitedNode):
             VisitedNode.append(currentNode)
 

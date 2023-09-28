@@ -300,9 +300,6 @@ def H3(state,problem):
     position, foodGrid = state
 
     Mindis = 99999
-    x1, y1 = 0, 0
-    x2, y2 = 0, 0
-    Sum = 0
     for i, j in foodGrid.asList():
         Mindis = min(Mindis,abs(i - position[0]) + abs(j - position[1]))
 

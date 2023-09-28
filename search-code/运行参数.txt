@@ -1,4 +1,4 @@
--l bigMaze -p SearchAgent -a fn=dfs
+-l mediumMaze -p SearchAgent -a fn=dfs
 -l bigMaze -p SearchAgent -a fn=bfs
 -l bigMaze -p SearchAgent -a fn=astar,heuristic=myHeuristic
--l Search -p AStarFoodSearchAgent
+-l smallSearch -p AStarFoodSearchAgent
