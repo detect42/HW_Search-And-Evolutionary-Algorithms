@@ -15,16 +15,16 @@ from tool_box import Generate_random_binary_string, Init_P, Get_P
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--graph-type', type=str, help='graph type', default='gset')
-    parser.add_argument('--n-nodes', type=int, help='the number of nodes', default=5000)
-    parser.add_argument('--n-d', type=int, help='the number of degrees for each node', default=6)
-    parser.add_argument('--T', type=int, help='the number of fitness evaluations', default=10000)
+    parser.add_argument('--n-nodes', type=int, help='the number of nodes', default=1000)
+    parser.add_argument('--n-d', type=int, help='the number of degrees for each node', default=10)
+    parser.add_argument('--T', type=int, help='the number of fitness evaluations', default=2000)
     parser.add_argument('--seed-g', type=int, help='the seed of generating regular graph', default=1)
     parser.add_argument('--seed', type=int, default=2023)
     parser.add_argument('--gset-id', type=int, default=1)
     parser.add_argument('--sigma', type=float, help='hyper-parameter of mutation operator', default=.1)
-    parser.add_argument('--size', type=int, help='the size of the group', default=8)
+    parser.add_argument('--size', type=int, help='the size of the group', default=1)
     # parser.add_argument('--lamda', type=int, help='the number per parent selection', default=2)
-    parser.add_argument('--prob_m', type=int, help='the propobility of bit-wise mutation', default=0.0035)
+    parser.add_argument('--prob_m', type=int, help='the propobility of bit-wise mutation', default=0.004)
     parser.add_argument('--prob_c', type=int, help='the propobility of one-point crossover', default=0.6)
     # parser.add_argument('--gama', type=int, help='for FPS', default=0.5)
     args = parser.parse_known_args()[0]
@@ -78,18 +78,20 @@ def SEA(args=get_args()):
     for _ in range(args.T):
         old_group = Selection_fitness(group, args.size)
         new_group = copy.deepcopy(group)
-        for i in range(args.size):
-            idx, idy = np.random.choice(args.size, 2)
-            x, y = old_group[idx][0], old_group[idy][0]
-            x, y = One_point_crossover(x, y, args.prob_c)
+
+        #for i in range(args.size):
+       #     idx, idy = np.random.choice(args.size, 2)
+       #     x, y = old_group[idx][0], old_group[idy][0]
+       #     x, y = Two_point_crossover(x, y, args.prob_c)
         #    x = Bit_wise_mutation(x, args.prob_m, graph, n_edge,old_group[idx][1])
         #    y = Bit_wise_mutation(y, args.prob_m, graph, n_edge,old_group[idy][1])
-            fitness_x = Get_fitness(graph, x, n_edge)
-            fitness_y = Get_fitness(graph, y, n_edge)
-            max_fitness = max(max_fitness, fitness_x, fitness_y)
-            new_group.append((x, fitness_x))
-            new_group.append((y, fitness_y))
+       #     fitness_x = Get_fitness(graph, x, n_edge)
+       #     fitness_y = Get_fitness(graph, y, n_edge)
+       #     max_fitness = max(max_fitness, fitness_x, fitness_y)
+       #     new_group.append((x, fitness_x))
+        #    new_group.append((y, fitness_y))
         Group = []
+
         for i in new_group:
             x= Heavy_tailed_mutation(i[0],args.prob_m,graph,n_edge,i[1])
             new_fitness=Get_fitness(graph,x,n_edge)
@@ -106,14 +108,13 @@ def SEA(args=get_args()):
 
 def Run_with_different_graph(args=get_args()):
     param_sets = []
-    for i in range(1, 2):
-        param_sets.append("G" + str(i))
+    for i in range(1, 11):
+        param_sets.append("G"+str(i))
     results = []
-    for i in range(1, 2):
+    for i in range(1, 11):
         args.gset_id = i
-        args.gset_id = 62
         iterations, best_results = SEA(args)
-        results.append({'params': param_sets[62], 'iterations': iterations, 'best_results': best_results})
+        results.append({'params': param_sets[i-1], 'iterations': iterations, 'best_results': best_results})
 
     # 绘制曲线
     for result in results:
