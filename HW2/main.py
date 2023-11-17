@@ -23,10 +23,8 @@ def get_args():
     parser.add_argument('--gset-id', type=int, default=1)
     parser.add_argument('--sigma', type=float, help='hyper-parameter of mutation operator', default=.1)
     parser.add_argument('--size', type=int, help='the size of the group', default=1)
-    # parser.add_argument('--lamda', type=int, help='the number per parent selection', default=2)
-    parser.add_argument('--prob_m', type=int, help='the propobility of bit-wise mutation', default=0.004)
-    parser.add_argument('--prob_c', type=int, help='the propobility of one-point crossover', default=0.6)
-    # parser.add_argument('--gama', type=int, help='for FPS', default=0.5)
+    parser.add_argument('--prob_m', type=int, help='the propobility of bit-wise mutation', default=0.003)
+    parser.add_argument('--prob_c', type=int, help='the propobility of one-point crossover', default=0.7)
     args = parser.parse_known_args()[0]
     return args
 
@@ -79,17 +77,17 @@ def SEA(args=get_args()):
         old_group = Selection_fitness(group, args.size)
         new_group = copy.deepcopy(group)
 
-        #for i in range(args.size):
-       #     idx, idy = np.random.choice(args.size, 2)
-       #     x, y = old_group[idx][0], old_group[idy][0]
-       #     x, y = Two_point_crossover(x, y, args.prob_c)
-        #    x = Bit_wise_mutation(x, args.prob_m, graph, n_edge,old_group[idx][1])
-        #    y = Bit_wise_mutation(y, args.prob_m, graph, n_edge,old_group[idy][1])
-       #     fitness_x = Get_fitness(graph, x, n_edge)
-       #     fitness_y = Get_fitness(graph, y, n_edge)
-       #     max_fitness = max(max_fitness, fitness_x, fitness_y)
-       #     new_group.append((x, fitness_x))
-        #    new_group.append((y, fitness_y))
+        for i in range(args.size):
+            idx, idy = np.random.choice(args.size, 2)
+            x, y = old_group[idx][0], old_group[idy][0]
+            x, y = Two_point_crossover(x, y, args.prob_c)
+            x = Bit_wise_mutation(x, args.prob_m, graph, n_edge,old_group[idx][1])
+            y = Bit_wise_mutation(y, args.prob_m, graph, n_edge,old_group[idy][1])
+            fitness_x = Get_fitness(graph, x, n_edge)
+            fitness_y = Get_fitness(graph, y, n_edge)
+            max_fitness = max(max_fitness, fitness_x, fitness_y)
+            new_group.append((x, fitness_x))
+            new_group.append((y, fitness_y))
         Group = []
 
         for i in new_group:
